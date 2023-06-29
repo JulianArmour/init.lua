@@ -36,6 +36,11 @@ I hope you enjoy your Neovim journey,
 P.S. You can delete this when you're done too. It's your config now :)
 --]]
 
+local at_work = false
+if string.match(vim.fn.hostname(), '%l+-ads%-%d+') ~= nil then
+  at_work = true
+end
+
 -- Set <space> as the leader key
 -- See `:help mapleader`
 --  NOTE: Must happen before plugins are required (otherwise wrong leader will be used)
@@ -464,6 +469,10 @@ local servers = {
   pylsp = {},
 }
 
+if not at_work then
+  servers['clangd'] = {}
+end
+
 -- Setup neovim lua configuration
 require('neodev').setup()
 
@@ -488,16 +497,18 @@ mason_lspconfig.setup_handlers {
   end,
 }
 
-require('lspconfig').clangd.setup {
-  cmd = {
-    '/auto/binos-tools/llvm11/llvm-11.0-p28/bin/clangd',
-    '--header-insertion=never',
-    '--log=info',
-    '-j=16',
-  },
-  capabilities = capabilities,
-  on_attach = on_attach,
-}
+if string.match(vim.fn.hostname(), '%l+-ads%-%d+') ~= nil then
+  require('lspconfig').clangd.setup {
+    cmd = {
+      '/auto/binos-tools/llvm11/llvm-11.0-p28/bin/clangd',
+      '--header-insertion=never',
+      '--log=info',
+      '-j=16',
+    },
+    capabilities = capabilities,
+    on_attach = on_attach,
+  }
+end
 
 -- nvim-cmp setup
 local cmp = require 'cmp'
