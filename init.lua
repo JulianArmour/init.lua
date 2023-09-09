@@ -136,10 +136,19 @@ require('lazy').setup({
         strings = false,
       },
     },
+  },
+
+  {
+    'rose-pine/neovim',
+    name = 'rose-pine',
+    opts = {
+      disable_italics = true,
+    },
     config = function(_, opts)
-      require('gruvbox').setup(opts)
-      vim.cmd.colorscheme 'gruvbox'
+      require('rose-pine').setup(opts)
+      vim.cmd.colorscheme 'rose-pine'
     end,
+    priority = 1000,
   },
 
   { -- Set lualine as statusline
@@ -148,22 +157,22 @@ require('lazy').setup({
     opts = {
       options = {
         icons_enabled = false,
-        theme = 'gruvbox',
+        theme = 'rose-pine',
         component_separators = '|',
         section_separators = '',
       },
     },
   },
 
-  { -- Add indentation guides even on blank lines
-    'lukas-reineke/indent-blankline.nvim',
-    -- Enable `lukas-reineke/indent-blankline.nvim`
-    -- See `:help indent_blankline.txt`
-    opts = {
-      char = '┊',
-      show_trailing_blankline_indent = false,
-    },
-  },
+  -- { -- Add indentation guides even on blank lines
+  --   'lukas-reineke/indent-blankline.nvim',
+  --   -- Enable `lukas-reineke/indent-blankline.nvim`
+  --   -- See `:help indent_blankline.txt`
+  --   opts = {
+  --     char = '┊',
+  --     show_trailing_blankline_indent = false,
+  --   },
+  -- },
 
   -- "gc" to comment visual regions/lines
   { 'numToStr/Comment.nvim', opts = {} },
@@ -190,6 +199,27 @@ require('lazy').setup({
       'nvim-treesitter/nvim-treesitter-textobjects',
     },
     build = ":TSUpdate",
+  },
+
+  {
+    'nvim-treesitter/nvim-treesitter-context',
+    -- opts = {},
+  },
+
+  {
+    'ThePrimeagen/harpoon',
+    opts = {},
+    config = function (_, opts)
+      require('harpoon').setup(opts)
+      local mark = require 'harpoon.mark'
+      local ui = require 'harpoon.ui'
+      vim.keymap.set('n', '<leader>a', mark.add_file)
+      vim.keymap.set('n', '<leader>h', ui.toggle_quick_menu)
+      vim.keymap.set('n', '<C-j>', function() ui.nav_file(1) end)
+      vim.keymap.set('n', '<C-k>', function() ui.nav_file(2) end)
+      vim.keymap.set('n', '<C-l>', function() ui.nav_file(3) end)
+      vim.keymap.set('n', '<C-;>', function() ui.nav_file(4) end)
+    end,
   },
 
   -- NOTE: Next Step on Your Neovim Journey: Add/Configure additional "plugins" for kickstart
@@ -258,6 +288,7 @@ vim.o.timeoutlen = 300
 
 -- Set completeopt to have a better completion experience
 vim.o.completeopt = 'menuone,noselect'
+vim.o.pumheight = 10
 
 -- NOTE: You should make sure your terminal supports this
 vim.o.termguicolors = true
@@ -323,6 +354,9 @@ vim.keymap.set('n', '<leader>tr', require('telescope.builtin').resume, { desc = 
 require('nvim-treesitter.configs').setup {
   -- Add languages to be installed here that you want installed for treesitter
   ensure_installed = { 'bash', 'c', 'cpp', 'go', 'lua', 'make', 'python', 'rust', 'tsx', 'typescript', 'vimdoc', 'vim' },
+  sync_install = false,
+  ignore_install = {},
+  modules = {},
 
   -- Autoinstall languages that are not installed. Defaults to false (but you can change for yourself!)
   auto_install = false,
@@ -375,7 +409,7 @@ require('nvim-treesitter.configs').setup {
       },
     },
     swap = {
-      enable = true,
+      enable = false,
       swap_next = {
         ['<leader>a'] = '@parameter.inner',
       },
@@ -421,7 +455,8 @@ local on_attach = function(client, bufnr)
 
   -- See `:help K` for why this keymap
   nmap('K', vim.lsp.buf.hover, 'Hover Documentation')
-  nmap('<C-k>', vim.lsp.buf.signature_help, 'Signature Documentation')
+  -- nmap('<C-k>', vim.lsp.buf.signature_help, 'Signature Documentation')
+  vim.keymap.set('i', '<C-k>', vim.lsp.buf.signature_help, {buffer = bufnr, desc = 'Signature Documentation'})
 
   -- Lesser used LSP functionality
   nmap('gD', vim.lsp.buf.declaration, '[G]oto [D]eclaration')
@@ -466,7 +501,21 @@ local servers = {
       telemetry = { enable = false },
     },
   },
-  pylsp = {},
+  -- pylsp = {
+  --   pylsp = {
+  --     configurationSources = { 'flake8' },
+  --     plugins = {
+  --       autopep8 = { enabled = false },
+  --       flake8 = {
+  --         config = '~/.config/flake8.cfg',
+  --         enabled = true,
+  --       },
+  --       mccabe = { enabled = false },
+  --       pycodestyle = { enabled = false },
+  --       pyflakes = { enabled = false },
+  --     }
+  --   }
+  -- },
 }
 
 if not at_work then
@@ -487,9 +536,11 @@ mason_lspconfig.setup {
   ensure_installed = vim.tbl_keys(servers),
 }
 
+local lspconfig = require'lspconfig'
+
 mason_lspconfig.setup_handlers {
   function(server_name)
-    require('lspconfig')[server_name].setup {
+    lspconfig[server_name].setup {
       capabilities = capabilities,
       on_attach = on_attach,
       settings = servers[server_name],
@@ -497,18 +548,54 @@ mason_lspconfig.setup_handlers {
   end,
 }
 
-if string.match(vim.fn.hostname(), '%l+-ads%-%d+') ~= nil then
-  require('lspconfig').clangd.setup {
+if at_work then
+  lspconfig.clangd.setup {
     cmd = {
       '/auto/binos-tools/llvm11/llvm-11.0-p28/bin/clangd',
       '--header-insertion=never',
-      '--log=info',
+      '--clang-tidy',
+      '--log=error',
       '-j=16',
     },
     capabilities = capabilities,
     on_attach = on_attach,
   }
 end
+
+lspconfig.pylsp.setup {
+  capabilities = capabilities,
+  on_attach = on_attach,
+  root_dir = function (fname)
+    local cwd = vim.fn.getcwd()
+    if string.match(cwd, 'binos/atests/') then
+      print(cwd)
+      return cwd
+    end
+    local root = lspconfig.util.root_pattern(
+      'pyproject.toml',
+      'setup.py',
+      'setup.cfg',
+      'requirements.txt',
+      'Pipfile'
+    )(fname) or lspconfig.util.find_git_ancestor(fname)
+    return root
+  end,
+  settings = {
+    pylsp = {
+      configurationSources = { 'flake8' },
+      plugins = {
+        autopep8 = { enabled = false },
+        flake8 = {
+          config = '~/.config/flake8.cfg',
+          enabled = true,
+        },
+        mccabe = { enabled = false },
+        pycodestyle = { enabled = false },
+        pyflakes = { enabled = false },
+      }
+    },
+  },
+}
 
 -- nvim-cmp setup
 local cmp = require 'cmp'
