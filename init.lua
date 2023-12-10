@@ -90,11 +90,7 @@ require('lazy').setup({
       -- NOTE: `opts = {}` is the same as calling `require('fidget').setup({})`
       {
         'j-hui/fidget.nvim',
-        opts = {
-          timer = {
-            spinner_rate = 500
-          },
-        },
+        opts = {},
       },
 
       -- Additional lua configuration, makes nvim stuff amazing!
@@ -242,7 +238,7 @@ require('lazy').setup({
 -- [[ Setting options ]]
 -- See `:help vim.o`
 
-vim.o.scrolloff = 5
+vim.o.scrolloff = 3
 
 -- Set highlight on search
 vim.o.hlsearch = false
@@ -568,7 +564,6 @@ lspconfig.pylsp.setup {
   root_dir = function (fname)
     local cwd = vim.fn.getcwd()
     if string.match(cwd, 'binos/atests/') then
-      print(cwd)
       return cwd
     end
     local root = lspconfig.util.root_pattern(
