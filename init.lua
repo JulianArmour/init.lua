@@ -497,21 +497,7 @@ local servers = {
       telemetry = { enable = false },
     },
   },
-  -- pylsp = {
-  --   pylsp = {
-  --     configurationSources = { 'flake8' },
-  --     plugins = {
-  --       autopep8 = { enabled = false },
-  --       flake8 = {
-  --         config = '~/.config/flake8.cfg',
-  --         enabled = true,
-  --       },
-  --       mccabe = { enabled = false },
-  --       pycodestyle = { enabled = false },
-  --       pyflakes = { enabled = false },
-  --     }
-  --   }
-  -- },
+  gopls = {},
 }
 
 if not at_work then
