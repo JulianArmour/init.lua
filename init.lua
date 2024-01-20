@@ -146,7 +146,7 @@ require('lazy').setup({
     },
     config = function(_, opts)
       require('rose-pine').setup(opts)
-      vim.cmd.colorscheme 'rose-pine'
+      vim.cmd.colorscheme 'rose-pine-moon'
     end,
     priority = 1000,
   },
@@ -551,7 +551,7 @@ mason_lspconfig.setup_handlers {
 if at_work then
   lspconfig.clangd.setup {
     cmd = {
-      '/auto/binos-tools/llvm11/llvm-11.0-p28/bin/clangd',
+      '/auto/binos-tools/llvm11/llvm-11.0-p30/bin/clangd',
       '--header-insertion=never',
       '--clang-tidy',
       '--log=error',
