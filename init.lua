@@ -148,27 +148,29 @@ require('lazy').setup({
       },
     },
   },
-
+  { "catppuccin/nvim",
+    name = "catppuccin",
+    priority = 1000,
+    config = function(_, opts)
+      require('catppuccin').setup(opts)
+      vim.cmd.colorscheme'catppuccin'
+    end,
+  },
   {
     'rose-pine/neovim',
     name = 'rose-pine',
     opts = {
       disable_italics = true,
     },
-    config = function(_, opts)
-      require('rose-pine').setup(opts)
-      vim.cmd.colorscheme 'rose-pine-moon'
-    end,
     priority = 1000,
   },
-
   { -- Set lualine as statusline
     'nvim-lualine/lualine.nvim',
     -- See `:help lualine.txt`
     opts = {
       options = {
         icons_enabled = false,
-        theme = 'rose-pine',
+        theme = 'catppuccin',
         component_separators = '|',
         section_separators = '',
       },
