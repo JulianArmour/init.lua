@@ -522,11 +522,11 @@ local servers = {
       telemetry = { enable = false },
     },
   },
+  gopls = {},
 }
 
 if not at_work then
   servers['clangd'] = {}
-  servers['gopls'] = {}
 end
 
 -- Setup neovim lua configuration
