@@ -151,9 +151,13 @@ require('lazy').setup({
   { "catppuccin/nvim",
     name = "catppuccin",
     priority = 1000,
-    config = function(_, opts)
-      require('catppuccin').setup(opts)
-      vim.cmd.colorscheme'catppuccin'
+  },
+  {
+    "fenetikm/falcon",
+    name = "falcon",
+    priority = 1000,
+    config = function()
+      vim.cmd.colorscheme('falcon')
     end,
   },
   {
@@ -493,7 +497,6 @@ local on_attach = function(client, bufnr)
   end, { desc = 'Format current buffer with LSP' })
 
   --highlight symbol under cursor
-  -- if client.server_capabilities.document_highlight then
   if client.server_capabilities.documentHighlightProvider then
     vim.api.nvim_create_augroup('lsp_document_highlight', {})
     vim.api.nvim_create_autocmd({ 'CursorHold', 'CursorHoldI' }, {
@@ -523,6 +526,15 @@ local servers = {
     },
   },
   gopls = {},
+  clangd = {
+    cmd = {
+      'clangd',
+      '--header-insertion=never',
+      '--clang-tidy',
+      '--log=verbose',
+      '-j=16',
+    },
+  },
 }
 
 if not at_work then
@@ -555,53 +567,53 @@ mason_lspconfig.setup_handlers {
   end,
 }
 
-if at_work then
-  lspconfig.clangd.setup {
-    cmd = {
-      '/auto/binos-tools/llvm11/llvm-11.0-p30/bin/clangd',
-      '--header-insertion=never',
-      '--clang-tidy',
-      '--log=error',
-      '-j=16',
-    },
-    capabilities = capabilities,
-    on_attach = on_attach,
-  }
-end
+-- if at_work then
+--   lspconfig.clangd.setup {
+--     cmd = {
+--       '/auto/binos-tools/llvm11/llvm-11.0-p30/bin/clangd',
+--       '--header-insertion=never',
+--       '--clang-tidy',
+--       '--log=verbose',
+--       '-j=1',
+--     },
+--     capabilities = capabilities,
+--     on_attach = on_attach,
+--   }
+-- end
 
-lspconfig.pylsp.setup {
-  capabilities = capabilities,
-  on_attach = on_attach,
-  root_dir = function (fname)
-    local cwd = vim.fn.getcwd()
-    if string.match(cwd, 'binos/atests/') then
-      return cwd
-    end
-    local root = lspconfig.util.root_pattern(
-      'pyproject.toml',
-      'setup.py',
-      'setup.cfg',
-      'requirements.txt',
-      'Pipfile'
-    )(fname) or lspconfig.util.find_git_ancestor(fname)
-    return root
-  end,
-  settings = {
-    pylsp = {
-      configurationSources = { 'flake8' },
-      plugins = {
-        autopep8 = { enabled = false },
-        flake8 = {
-          config = '~/.config/flake8.cfg',
-          enabled = true,
-        },
-        mccabe = { enabled = false },
-        pycodestyle = { enabled = false },
-        pyflakes = { enabled = false },
-      }
-    },
-  },
-}
+-- lspconfig.pylsp.setup {
+--   capabilities = capabilities,
+--   on_attach = on_attach,
+--   root_dir = function (fname)
+--     local cwd = vim.fn.getcwd()
+--     if string.match(cwd, 'binos/atests/') then
+--       return cwd
+--     end
+--     local root = lspconfig.util.root_pattern(
+--       'pyproject.toml',
+--       'setup.py',
+--       'setup.cfg',
+--       'requirements.txt',
+--       'Pipfile'
+--     )(fname) or lspconfig.util.find_git_ancestor(fname)
+--     return root
+--   end,
+--   settings = {
+--     pylsp = {
+--       configurationSources = { 'flake8' },
+--       plugins = {
+--         autopep8 = { enabled = false },
+--         flake8 = {
+--           config = '~/.config/flake8.cfg',
+--           enabled = true,
+--         },
+--         mccabe = { enabled = false },
+--         pycodestyle = { enabled = false },
+--         pyflakes = { enabled = false },
+--       }
+--     },
+--   },
+-- }
 
 -- nvim-cmp setup
 local cmp = require 'cmp'
