@@ -77,6 +77,9 @@ require('lazy').setup({
   -- Detect tabstop and shiftwidth automatically
   'tpope/vim-sleuth',
 
+  -- copilot
+  'github/copilot.vim',
+
   -- NOTE: This is where your plugins related to LSP can be installed.
   --  The configuration is done below. Search for lspconfig to find it below.
   { -- LSP Configuration & Plugins
@@ -303,6 +306,11 @@ vim.o.undofile = true
 vim.o.ignorecase = true
 vim.o.smartcase = true
 
+-- python indentation, the way I like it
+-- vim.g.python_indent = {
+--
+-- }
+
 -- Keep signcolumn on by default
 vim.wo.signcolumn = 'yes'
 
@@ -389,7 +397,7 @@ require('nvim-treesitter.configs').setup {
   highlight = {
     enable = true,
   },
-  indent = { enable = true, disable = { 'python' } },
+  indent = { enable = true, --[[ disable = { 'python' } ]] },
   incremental_selection = {
     enable = true,
     keymaps = {
@@ -454,12 +462,6 @@ vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = "Open diagn
 -- LSP settings.
 --  This function gets run when an LSP connects to a particular buffer.
 local on_attach = function(client, bufnr)
-  -- NOTE: Remember that lua is a real programming language, and as such it is possible
-  -- to define small helper and utility functions so you don't have to repeat yourself
-  -- many times.
-  --
-  -- In this case, we create a function that lets us more easily define mappings specific
-  -- for LSP related items. It sets the mode, buffer and description for us each time.
   local nmap = function(keys, func, desc)
     if desc then
       desc = 'LSP: ' .. desc
@@ -498,15 +500,17 @@ local on_attach = function(client, bufnr)
 
   --highlight symbol under cursor
   if client.server_capabilities.documentHighlightProvider then
-    vim.api.nvim_create_augroup('lsp_document_highlight', {})
+    vim.api.nvim_create_augroup('lsp_document_highlight', {
+      clear = false,
+    })
     vim.api.nvim_create_autocmd({ 'CursorHold', 'CursorHoldI' }, {
       group = 'lsp_document_highlight',
-      -- buffer = 0,
+      buffer = bufnr,
       callback = vim.lsp.buf.document_highlight,
     })
     vim.api.nvim_create_autocmd('CursorMoved', {
       group = 'lsp_document_highlight',
-      -- buffer = 0,
+      buffer = bufnr,
       callback = vim.lsp.buf.clear_references,
     })
   end
@@ -526,15 +530,6 @@ local servers = {
     },
   },
   gopls = {},
-  clangd = {
-    cmd = {
-      'clangd',
-      '--header-insertion=never',
-      '--clang-tidy',
-      '--log=verbose',
-      '-j=16',
-    },
-  },
 }
 
 if not at_work then
@@ -559,6 +554,10 @@ local lspconfig = require'lspconfig'
 
 mason_lspconfig.setup_handlers {
   function(server_name)
+    -- ignore copilot
+    if server_name == "GitHub Copilot" then
+      return
+    end
     lspconfig[server_name].setup {
       capabilities = capabilities,
       on_attach = on_attach,
@@ -567,53 +566,21 @@ mason_lspconfig.setup_handlers {
   end,
 }
 
--- if at_work then
---   lspconfig.clangd.setup {
---     cmd = {
---       '/auto/binos-tools/llvm11/llvm-11.0-p30/bin/clangd',
---       '--header-insertion=never',
---       '--clang-tidy',
---       '--log=verbose',
---       '-j=1',
---     },
---     capabilities = capabilities,
---     on_attach = on_attach,
---   }
--- end
-
--- lspconfig.pylsp.setup {
---   capabilities = capabilities,
---   on_attach = on_attach,
---   root_dir = function (fname)
---     local cwd = vim.fn.getcwd()
---     if string.match(cwd, 'binos/atests/') then
---       return cwd
---     end
---     local root = lspconfig.util.root_pattern(
---       'pyproject.toml',
---       'setup.py',
---       'setup.cfg',
---       'requirements.txt',
---       'Pipfile'
---     )(fname) or lspconfig.util.find_git_ancestor(fname)
---     return root
---   end,
---   settings = {
---     pylsp = {
---       configurationSources = { 'flake8' },
---       plugins = {
---         autopep8 = { enabled = false },
---         flake8 = {
---           config = '~/.config/flake8.cfg',
---           enabled = true,
---         },
---         mccabe = { enabled = false },
---         pycodestyle = { enabled = false },
---         pyflakes = { enabled = false },
---       }
---     },
---   },
--- }
+if at_work then
+  lspconfig.clangd.setup {
+    cmd = {
+      '/auto/binos-tools/llvm19/llvm-19.0-p2/bin/clangd',
+      '--header-insertion=never',
+      '--clang-tidy',
+      '--log=verbose',
+      '-j=4',
+    },
+    capabilities = vim.tbl_deep_extend('force', capabilities, {
+      offsetEncoding = 'utf-16',
+    }),
+    on_attach = on_attach,
+  }
+end
 
 -- nvim-cmp setup
 local cmp = require 'cmp'
@@ -635,31 +602,31 @@ cmp.setup {
     ['<C-f>'] = cmp.mapping.scroll_docs(4),
     ['<C-Space>'] = cmp.mapping.complete {},
     ['<CR>'] = cmp.mapping.confirm {
-      behavior = cmp.ConfirmBehavior.Replace,
+      behavior = cmp.ConfirmBehavior.Insert,
       select = true,
     },
-    ['<Tab>'] = cmp.mapping(function(fallback)
-      if cmp.visible() then
-        cmp.select_next_item()
-      elseif luasnip.expand_or_jumpable() then
-        luasnip.expand_or_jump()
-      else
-        fallback()
-      end
-    end, { 'i', 's' }),
-    ['<S-Tab>'] = cmp.mapping(function(fallback)
-      if cmp.visible() then
-        cmp.select_prev_item()
-      elseif luasnip.jumpable(-1) then
-        luasnip.jump(-1)
-      else
-        fallback()
-      end
-    end, { 'i', 's' }),
+    -- ['<Tab>'] = cmp.mapping(function(fallback)
+    --   if cmp.visible() then
+    --     cmp.select_next_item()
+    --   -- elseif luasnip.expand_or_jumpable() then
+    --   --   luasnip.expand_or_jump()
+    --   else
+    --     fallback()
+    --   end
+    -- end, { 'i', 's' }),
+    -- ['<S-Tab>'] = cmp.mapping(function(fallback)
+    --   if cmp.visible() then
+    --     cmp.select_prev_item()
+    --   -- elseif luasnip.jumpable(-1) then
+    --   --   luasnip.jump(-1)
+    --   else
+    --     fallback()
+    --   end
+    -- end, { 'i', 's' }),
   },
   sources = {
     { name = 'nvim_lsp' },
-    { name = 'luasnip' },
+    -- { name = 'luasnip' },
   },
 }
 
