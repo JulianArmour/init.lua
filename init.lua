@@ -320,7 +320,7 @@ vim.o.timeout = true
 vim.o.timeoutlen = 300
 
 -- Set completeopt to have a better completion experience
-vim.o.completeopt = 'menuone,noselect'
+vim.o.completeopt = 'menuone,noselect,popup'
 vim.o.pumheight = 10
 
 -- NOTE: You should make sure your terminal supports this
@@ -386,7 +386,7 @@ vim.keymap.set('n', '<leader>tr', require('telescope.builtin').resume, { desc = 
 -- See `:help nvim-treesitter`
 require('nvim-treesitter.configs').setup {
   -- Add languages to be installed here that you want installed for treesitter
-  ensure_installed = { 'bash', 'c', 'cpp', 'go', 'lua', 'make', 'python', 'rust', 'tsx', 'typescript', 'vimdoc', 'vim' },
+  ensure_installed = { 'bash', 'c', 'cpp', 'go', 'lua', 'make', 'python', 'rust', 'tsx', 'typescript', 'vimdoc', 'vim', 'markdown'},
   sync_install = false,
   ignore_install = {},
   modules = {},
