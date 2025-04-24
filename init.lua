@@ -79,6 +79,13 @@ require('lazy').setup({
 
   -- copilot
   'github/copilot.vim',
+  {
+    'CopilotC-Nvim/CopilotChat.nvim',
+    dependencies = {
+      'nvim-lua/plenary.nvim',
+    },
+    opts = {},
+  },
 
   -- NOTE: This is where your plugins related to LSP can be installed.
   --  The configuration is done below. Search for lspconfig to find it below.
@@ -207,6 +214,7 @@ require('lazy').setup({
 
   -- Fuzzy Finder (files, lsp, etc)
   { 'nvim-telescope/telescope.nvim', version = '*', dependencies = { 'nvim-lua/plenary.nvim' } },
+  { 'nvim-telescope/telescope-ui-select.nvim' },
 
   -- Fuzzy Finder Algorithm which requires local dependencies to be built.
   -- Only load if `make` is available. Make sure you have the system
@@ -349,7 +357,8 @@ vim.api.nvim_create_autocmd('TextYankPost', {
 
 -- [[ Configure Telescope ]]
 -- See `:help telescope` and `:help telescope.setup()`
-require('telescope').setup {
+local telescope = require('telescope')
+telescope.setup {
   defaults = {
     mappings = {
       i = {
@@ -358,7 +367,13 @@ require('telescope').setup {
       },
     },
   },
+  extensions = {
+    ["ui-select"] = {
+      require("telescope.themes").get_dropdown({})
+    }
+  },
 }
+telescope.load_extension("ui-select")
 
 -- Enable telescope fzf native, if installed
 pcall(require('telescope').load_extension, 'fzf')
@@ -386,7 +401,7 @@ vim.keymap.set('n', '<leader>tr', require('telescope.builtin').resume, { desc = 
 -- See `:help nvim-treesitter`
 require('nvim-treesitter.configs').setup {
   -- Add languages to be installed here that you want installed for treesitter
-  ensure_installed = { 'bash', 'c', 'cpp', 'go', 'lua', 'make', 'python', 'rust', 'tsx', 'typescript', 'vimdoc', 'vim', 'markdown'},
+  ensure_installed = { 'bash', 'c', 'cpp', 'go', 'lua', 'make', 'python', 'rust', 'tsx', 'typescript', 'vimdoc', 'vim', 'markdown', 'diff'},
   sync_install = false,
   ignore_install = {},
   modules = {},
