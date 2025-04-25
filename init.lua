@@ -84,7 +84,17 @@ require('lazy').setup({
     dependencies = {
       'nvim-lua/plenary.nvim',
     },
-    opts = {},
+    opts = {
+      model = 'claude-3.7-sonnet',
+      window = {
+        width = 0.25,
+      },
+    },
+    config = function(_, opts)
+      local chat = require('CopilotChat')
+      chat.setup(opts)
+      vim.keymap.set('n', '<leader>cc', function() chat.toggle() end, { desc = 'Toggle Copilot Chat' })
+    end,
   },
 
   -- NOTE: This is where your plugins related to LSP can be installed.
