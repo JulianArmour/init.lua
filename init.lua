@@ -555,6 +555,7 @@ local servers = {
     },
   },
   gopls = {},
+  pyright = {},
 }
 
 if not at_work then
@@ -587,6 +588,18 @@ mason_lspconfig.setup_handlers {
       capabilities = capabilities,
       on_attach = on_attach,
       settings = servers[server_name],
+    }
+  end,
+  ["pyright"] = function()
+    lspconfig.pyright.setup {
+      capabilities = capabilities,
+      on_attach = on_attach,
+      settings = servers["pyright"],
+      root_dir = function (_)
+        local cwd = vim.fn.getcwd(0)
+        print("root_dir", cwd)
+        return cwd
+      end,
     }
   end,
 }
