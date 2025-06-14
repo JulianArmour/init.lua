@@ -1,55 +1,11 @@
---[[
-
-=====================================================================
-==================== READ THIS BEFORE CONTINUING ====================
-=====================================================================
-
-Kickstart.nvim is *not* a distribution.
-
-Kickstart.nvim is a template for your own configuration.
-  The goal is that you can read every line of code, top-to-bottom, and understand
-  what your configuration is doing.
-
-  Once you've done that, you should start exploring, configuring and tinkering to
-  explore Neovim!
-
-  If you don't know anything about Lua, I recommend taking some time to read through
-  a guide. One possible example:
-  - https://learnxinyminutes.com/docs/lua/
-
-  And then you can explore or search through `:help lua-guide`
-
-
-Kickstart Guide:
-
-I have left several `:help X` comments throughout the init.lua
-You should run that command and read that help section for more information.
-
-In addition, I have some `NOTE:` items throughout the file.
-These are for you, the reader to help understand what is happening. Feel free to delete
-them once you know what you're doing, but they should serve as a guide for when you
-are first encountering a few different constructs in your nvim config.
-
-I hope you enjoy your Neovim journey,
-- TJ
-
-P.S. You can delete this when you're done too. It's your config now :)
---]]
-
 local at_work = false
 if string.match(vim.fn.hostname(), '%l+-ads%-%d+') ~= nil then
   at_work = true
 end
 
--- Set <space> as the leader key
--- See `:help mapleader`
---  NOTE: Must happen before plugins are required (otherwise wrong leader will be used)
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 
--- Install package manager
---    https://github.com/folke/lazy.nvim
---    `:help lazy.nvim.txt` for more info
 local lazypath = vim.fn.stdpath 'data' .. '/lazy/lazy.nvim'
 if not vim.loop.fs_stat(lazypath) then
   vim.fn.system {
@@ -63,21 +19,10 @@ if not vim.loop.fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
--- NOTE: Here is where you install your plugins.
---  You can configure plugins using the `config` key.
---
---  You can also configure plugins after the setup call,
---    as they will be available in your neovim runtime.
 require('lazy').setup({
-  -- NOTE: First, some plugins that don't require any configuration
-  -- Git related plugins
   'tpope/vim-fugitive',
   'tpope/vim-rhubarb',
-
-  -- Detect tabstop and shiftwidth automatically
   'tpope/vim-sleuth',
-
-  -- copilot
   'github/copilot.vim',
   {
     'CopilotC-Nvim/CopilotChat.nvim',
@@ -90,35 +35,33 @@ require('lazy').setup({
         width = 0.25,
       },
     },
-    config = function(_, opts)
-      local chat = require('CopilotChat')
-      chat.setup(opts)
-      vim.keymap.set('n', '<leader>cc', function() chat.toggle() end, { desc = 'Toggle Copilot Chat' })
-    end,
+    keys = {
+      {"<leader>cc", function() require('CopilotChat').toggle() end, desc = "Toggle Copilot Chat"},
+    },
   },
-
-  -- NOTE: This is where your plugins related to LSP can be installed.
-  --  The configuration is done below. Search for lspconfig to find it below.
-  { -- LSP Configuration & Plugins
+  {
     'neovim/nvim-lspconfig',
     dependencies = {
       -- Automatically install LSPs to stdpath for neovim
       { 'williamboman/mason.nvim', config = true },
-      'williamboman/mason-lspconfig.nvim',
-
-      -- Useful status updates for LSP
-      -- NOTE: `opts = {}` is the same as calling `require('fidget').setup({})`
+      { 'williamboman/mason-lspconfig.nvim' },
       {
         'j-hui/fidget.nvim',
         opts = {},
       },
-
-      -- Additional lua configuration, makes nvim stuff amazing!
-      'folke/neodev.nvim',
     },
-    event = "VeryLazy"
   },
-
+  {
+    "folke/lazydev.nvim",
+    ft = "lua", -- only load on lua files
+    opts = {
+      library = {
+        -- See the configuration section for more details
+        -- Load luvit types when the `vim.uv` word is found
+        { path = "${3rd}/luv/library", words = { "vim%.uv" } },
+      },
+    },
+  },
   {
     "hedyhli/outline.nvim",
     lazy = true,
@@ -201,15 +144,6 @@ require('lazy').setup({
     },
   },
 
-  -- { -- Add indentation guides even on blank lines
-  --   'lukas-reineke/indent-blankline.nvim',
-  --   -- Enable `lukas-reineke/indent-blankline.nvim`
-  --   -- See `:help indent_blankline.txt`
-  --   opts = {
-  --     char = '┊',
-  --     show_trailing_blankline_indent = false,
-  --   },
-  -- },
   {
     "kylechui/nvim-surround",
     version = "*", -- Use for stability; omit to use `main` branch for the latest features
@@ -283,7 +217,7 @@ require('lazy').setup({
   --    An additional note is that if you only copied in the `init.lua`, you can just comment this line
   --    to get rid of the warning telling you that there are not plugins in `lua/custom/plugins/`.
   { import = 'custom.plugins' },
-}, {})
+})
 
 -- [[ Setting options ]]
 -- See `:help vim.o`
@@ -479,8 +413,10 @@ require('nvim-treesitter.configs').setup {
 }
 
 -- Diagnostic keymaps
-vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, { desc = "Go to previous diagnostic message" })
-vim.keymap.set('n', ']d', vim.diagnostic.goto_next, { desc = "Go to next diagnostic message" })
+vim.keymap.set('n', '[d', function() vim.diagnostic.jump{count=-1} end,
+  { desc = "Go to previous diagnostic message" })
+vim.keymap.set('n', ']d', function() vim.diagnostic.jump{count=1} end,
+  { desc = "Go to next diagnostic message" })
 vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, { desc = "Open floating diagnostic message" })
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = "Open diagnostics list" })
 
@@ -539,73 +475,36 @@ local on_attach = function(client, bufnr)
       callback = vim.lsp.buf.clear_references,
     })
   end
-
 end
-
--- Enable the following language servers
---  Feel free to add/remove any LSPs that you want here. They will automatically be installed.
---
---  Add any additional override configuration in the following tables. They will be passed to
---  the `settings` field of the server config. You must look up that documentation yourself.
-local servers = {
-  lua_ls = {
-    Lua = {
-      workspace = { checkThirdParty = false },
-      telemetry = { enable = false },
-    },
-  },
-  gopls = {},
-  pyright = {},
-}
-
-if not at_work then
-  servers['clangd'] = {}
-end
-
--- Setup neovim lua configuration
-require('neodev').setup()
 
 -- nvim-cmp supports additional completion capabilities, so broadcast that to servers
 local capabilities = vim.lsp.protocol.make_client_capabilities()
 capabilities = require('cmp_nvim_lsp').default_capabilities(capabilities)
 
--- Ensure the servers above are installed
-local mason_lspconfig = require 'mason-lspconfig'
+local servers = {'lua_ls', 'gopls', 'pyright', 'clangd'}
 
-mason_lspconfig.setup {
-  ensure_installed = vim.tbl_keys(servers),
-}
-
-local lspconfig = require'lspconfig'
-
-mason_lspconfig.setup_handlers {
-  function(server_name)
-    -- ignore copilot
-    if server_name == "GitHub Copilot" then
-      return
-    end
-    lspconfig[server_name].setup {
-      capabilities = capabilities,
-      on_attach = on_attach,
-      settings = servers[server_name],
-    }
+vim.lsp.config('*', {
+  capabilities = capabilities,
+  on_attach = on_attach,
+})
+-- vim.lsp.config('GitHub Copilot', {
+--   on_attach = nil,
+-- })
+vim.lsp.config('lua_ls', {
+  settings = {
+    Lua = {
+      workspace = { checkThirdParty = false },
+      telemetry = { enable = false },
+    },
+  },
+})
+vim.lsp.config('pyright', {
+  root_dir = function(_)
+    return vim.fn.getcwd(0)
   end,
-  ["pyright"] = function()
-    lspconfig.pyright.setup {
-      capabilities = capabilities,
-      on_attach = on_attach,
-      settings = servers["pyright"],
-      root_dir = function (_)
-        local cwd = vim.fn.getcwd(0)
-        print("root_dir", cwd)
-        return cwd
-      end,
-    }
-  end,
-}
-
+})
 if at_work then
-  lspconfig.clangd.setup {
+  vim.lsp.config('clangd', {
     cmd = {
       '/auto/binos-tools/llvm19/llvm-19.0-p2/bin/clangd',
       '--header-insertion=never',
@@ -616,9 +515,13 @@ if at_work then
     capabilities = vim.tbl_deep_extend('force', capabilities, {
       offsetEncoding = 'utf-16',
     }),
-    on_attach = on_attach,
-  }
+  })
 end
+
+require'mason-lspconfig'.setup {
+  ensure_installed = servers,
+  automatic_enable = true,
+}
 
 -- nvim-cmp setup
 local cmp = require 'cmp'
