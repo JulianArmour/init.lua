@@ -21,5 +21,7 @@ vim.o.timeoutlen = 300
 vim.o.completeopt = 'menuone,noselect,popup'
 vim.o.pumheight = 10
 vim.o.termguicolors = true
+vim.o.splitright = true
+vim.o.splitbelow = true
 
 return {}
