@@ -23,7 +23,6 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 require('lazy').setup({
-  'tpope/vim-fugitive',
   'tpope/vim-rhubarb',
   'tpope/vim-sleuth',
   'github/copilot.vim',
@@ -205,6 +204,7 @@ require('lazy').setup({
     end,
   },
   { import = 'custom.plugins' },
+  { import = 'plugins' }
 })
 
 
