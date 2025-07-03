@@ -2,8 +2,8 @@ return {
   'ThePrimeagen/harpoon',
   opts = {},
   keys = {
-    {'<leader>a', function() require('harpoon.mark').add_file() end},
-    {'<leader>h', function() require('harpoon.ui').toggle_quick_menu() end},
+    {'<leader>a', function() require('harpoon.mark').add_file() end, desc = 'poon the current file'},
+    {'<leader>h', function() require('harpoon.ui').toggle_quick_menu() end}, desc = 'S[h]ow the current pooned files',
     {'<C-j>', function() require('harpoon.ui').nav_file(1) end},
     {'<C-k>', function() require('harpoon.ui').nav_file(2) end},
     {'<C-l>', function() require('harpoon.ui').nav_file(3) end},
