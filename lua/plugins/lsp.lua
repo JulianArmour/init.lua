@@ -85,9 +85,9 @@ return {
       },
     })
     vim.lsp.config('pyright', {
-      root_dir = function(_)
-        return vim.fn.getcwd(0)
-      end,
+      root_dir = function(_, on_dir)
+        on_dir(vim.fn.getcwd())
+      end
     })
     if vim.g.at_work then
       vim.lsp.config('clangd', {
