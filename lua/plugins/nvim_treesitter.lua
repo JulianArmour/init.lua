@@ -4,7 +4,7 @@ return {
   build = ":TSUpdate",
   opts = {
     ensure_installed = {
-      'bash', 'c', 'cpp', 'go', 'lua', 'make', 'python', 'rust', 'tsx', 'typescript', 'vimdoc', 'vim', 'markdown', 'diff'
+      'bash', 'c', 'cpp', 'go', 'lua', 'make', 'python', 'rust', 'tsx', 'typescript', 'vimdoc', 'vim', 'markdown', 'diff', 'html', 'latex',
     },
     sync_install = false,
     ignore_install = {},
