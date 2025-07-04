@@ -101,6 +101,7 @@ return {
         capabilities = vim.tbl_deep_extend('force', capabilities, {
           offsetEncoding = 'utf-16',
         }),
+        on_attach = on_attach,
       })
     end
 
