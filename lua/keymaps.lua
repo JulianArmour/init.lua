@@ -14,4 +14,12 @@ vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist,
 vim.keymap.set('n', 'k', "v:count == 0 ? 'gk' : 'k'", { expr = true, silent = true })
 vim.keymap.set('n', 'j', "v:count == 0 ? 'gj' : 'j'", { expr = true, silent = true })
 
+-- more fluid window resizing
+vim.keymap.set('n', '<M-k>', '<cmd>resize +1<CR>', { desc = "Increase window height" })
+vim.keymap.set('n', '<M-j>', '<cmd>resize -1<CR>', { desc = "Decrease window height" })
+vim.keymap.set('n', '<M-l>', '<cmd>vertical resize +1<CR>', { desc = "Increase window width" })
+vim.keymap.set('n', '<M-h>', '<cmd>vertical resize -1<CR>', { desc = "Decrease window width" })
+
+
+
 return {}
