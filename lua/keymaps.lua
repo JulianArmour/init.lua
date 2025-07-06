@@ -20,6 +20,7 @@ vim.keymap.set('n', '<M-j>', '<cmd>resize -1<CR>', { desc = "Decrease window hei
 vim.keymap.set('n', '<M-l>', '<cmd>vertical resize +1<CR>', { desc = "Increase window width" })
 vim.keymap.set('n', '<M-h>', '<cmd>vertical resize -1<CR>', { desc = "Decrease window width" })
 
-
+-- close help window
+vim.keymap.set('n', '<C-w>H', '<cmd>helpclose<CR>', { desc = "Close help window" })
 
 return {}

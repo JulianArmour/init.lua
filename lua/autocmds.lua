@@ -10,7 +10,7 @@ vim.api.nvim_create_autocmd('TextYankPost', {
 
 -- open help window vertically to the right.
 local help_group = vim.api.nvim_create_augroup('HelpWindow', {})
-vim.api.nvim_create_autocmd('BufReadPost', {
+vim.api.nvim_create_autocmd('BufEnter', {
   callback = function(ev)
     local buffer_type = vim.api.nvim_get_option_value('buftype', {buf = ev.buf})
     if buffer_type == "help" then
