@@ -65,7 +65,7 @@ return {
     local capabilities = vim.lsp.protocol.make_client_capabilities()
     capabilities = require('cmp_nvim_lsp').default_capabilities(capabilities)
 
-    local servers = { 'lua_ls', 'gopls', 'pyright', 'clangd' }
+    -- local servers = { 'lua_ls', 'gopls', 'pyright', }
 
     vim.lsp.config('*', {
       capabilities = capabilities,
@@ -92,7 +92,7 @@ return {
     if vim.g.at_work then
       vim.lsp.config('clangd', {
         cmd = {
-          '/auto/binos-tools/llvm19/llvm-19.0-p2/bin/clangd',
+          '/auto/binos-tools/lux/llvm/14.0-p30.5/bin/clangd',
           '--header-insertion=never',
           '--clang-tidy',
           '--log=verbose',
@@ -106,7 +106,7 @@ return {
     end
 
     require 'mason-lspconfig'.setup {
-      ensure_installed = servers,
+      ensure_installed = {},
       automatic_enable = true,
     }
   end

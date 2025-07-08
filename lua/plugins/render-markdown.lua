@@ -7,8 +7,7 @@ return {
   ---@module 'render-markdown'
   ---@type render.md.UserConfig
   opts = {
-    -- code = {
-    -- },
+    file_types = { 'markdown', 'codecompanion'},
     overrides = {
       buftype = {
         nofile = {
