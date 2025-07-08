@@ -8,7 +8,7 @@ vim.api.nvim_create_autocmd('TextYankPost', {
   pattern = '*',
 })
 
--- open help window vertically to the right.
+--[[ -- open help window vertically to the right.
 local help_group = vim.api.nvim_create_augroup('HelpWindow', {})
 vim.api.nvim_create_autocmd('BufEnter', {
   callback = function(ev)
@@ -19,4 +19,4 @@ vim.api.nvim_create_autocmd('BufEnter', {
   end,
   group = help_group,
   pattern = '*.txt',
-})
+}) ]]
