@@ -56,6 +56,30 @@ local on_attach = function(client, bufnr)
   end
 end
 
+local find_work_clangd = function()
+  local command_files = vim.fs.find(function(name)
+    return name:match('%.command$') ~= nil
+  end, {
+    path = vim.fn.getcwd(),
+    type = 'file',
+    limit = 1,
+  })
+
+  local command_file = command_files[1]
+  if not command_file then
+    return nil
+  end
+
+  local lines = vim.fn.readfile(command_file)
+  local contents = table.concat(lines, '\n')
+  local toolchain_dir = contents:match('(/auto/binos%-tools/llvm%d+/llvm%-%S+)/bin/[%w._+-]+')
+  if not toolchain_dir then
+    return nil
+  end
+
+  return toolchain_dir .. '/bin/clangd'
+end
+
 return {
   'neovim/nvim-lspconfig',
   dependencies = {
@@ -103,10 +127,10 @@ return {
       end,
     })
     if vim.g.at_work then
+      local clangd_cmd = find_work_clangd() or '/auto/binos-tools/llvm14/llvm-14.0-p47/bin/clangd'
       vim.lsp.config('clangd', {
         cmd = {
-          -- '/auto/binos-tools/lux/llvm/14.0-p30.5/bin/clangd',
-          '/auto/binos-tools/llvm14/llvm-14.0-p47/bin/clangd',
+          clangd_cmd,
           '--header-insertion=never',
           '--clang-tidy',
           '--background-index',
