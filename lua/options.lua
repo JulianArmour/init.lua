@@ -10,6 +10,7 @@ vim.o.shiftwidth = 0
 vim.o.softtabstop = -1
 vim.o.expandtab = true
 vim.o.clipboard = 'unnamedplus'
+vim.g.clipboard= 'osc52'
 vim.o.breakindent = true
 vim.o.undofile = true
 vim.o.ignorecase = true

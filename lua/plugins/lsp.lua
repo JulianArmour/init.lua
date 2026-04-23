@@ -19,7 +19,7 @@ local on_attach = function(client, bufnr)
   -- See `:help K` for why this keymap
   nmap('K', vim.lsp.buf.hover, 'Hover Documentation')
   -- nmap('<C-k>', vim.lsp.buf.signature_help, 'Signature Documentation')
-  vim.keymap.set('i', '<C-k>', vim.lsp.buf.signature_help, {buffer = bufnr, desc = 'Signature Documentation'})
+  vim.keymap.set('i', '<C-k>', vim.lsp.buf.signature_help, { buffer = bufnr, desc = 'Signature Documentation' })
 
   -- Lesser used LSP functionality
   nmap('gD', vim.lsp.buf.declaration, '[G]oto [D]eclaration')
@@ -33,6 +33,10 @@ local on_attach = function(client, bufnr)
   vim.api.nvim_buf_create_user_command(bufnr, 'Format', function(_)
     vim.lsp.buf.format()
   end, { desc = 'Format current buffer with LSP' })
+
+  -- if client.name == "clangd" then
+  --   client.server_capabilities.semanticTokensProvider = nil
+  -- end
 
   --highlight symbol under cursor
   if client.server_capabilities.documentHighlightProvider then
@@ -71,6 +75,15 @@ return {
       capabilities = capabilities,
       on_attach = on_attach,
     })
+    vim.lsp.config('gopls', {
+      capabilities = capabilities,
+      on_attach = on_attach,
+      settings = {
+        gopls = {
+          buildFlags = {"-tags=systest"},
+        },
+      }
+    })
     vim.lsp.config('GitHub Copilot', {
       on_attach = nil,
     })
@@ -92,15 +105,20 @@ return {
     if vim.g.at_work then
       vim.lsp.config('clangd', {
         cmd = {
-          '/auto/binos-tools/lux/llvm/14.0-p30.5/bin/clangd',
+          -- '/auto/binos-tools/lux/llvm/14.0-p30.5/bin/clangd',
+          '/auto/binos-tools/llvm14/llvm-14.0-p47/bin/clangd',
           '--header-insertion=never',
           '--clang-tidy',
-          '--log=verbose',
+          '--background-index',
+          '--limit-results=30',
+          '--pch-storage=memory',
+          '--log=error',
           '-j=4',
         },
         capabilities = vim.tbl_deep_extend('force', capabilities, {
           offsetEncoding = 'utf-16',
         }),
+        -- debounce_text_changes = 1000,
         on_attach = on_attach,
       })
     end
