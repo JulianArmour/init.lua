@@ -40,18 +40,26 @@ local on_attach = function(client, bufnr)
 
   --highlight symbol under cursor
   if client.server_capabilities.documentHighlightProvider then
-    vim.api.nvim_create_augroup('lsp_document_highlight', {
+    local group = vim.api.nvim_create_augroup('lsp_document_highlight', {
       clear = false,
     })
-    vim.api.nvim_create_autocmd({ 'CursorHold', 'CursorHoldI' }, {
-      group = 'lsp_document_highlight',
+    vim.api.nvim_create_autocmd('CursorHold', {
+      group = group,
       buffer = bufnr,
       callback = vim.lsp.buf.document_highlight,
     })
     vim.api.nvim_create_autocmd('CursorMoved', {
-      group = 'lsp_document_highlight',
+      group = group,
       buffer = bufnr,
       callback = vim.lsp.buf.clear_references,
+    })
+    vim.api.nvim_create_autocmd('LspDetach', {
+      group = group,
+      buffer = bufnr,
+      callback = function()
+        vim.lsp.buf.clear_references()
+        vim.api.nvim_del_augroup_by_id(group)
+      end,
     })
   end
 end
@@ -107,9 +115,6 @@ return {
           buildFlags = {"-tags=systest"},
         },
       }
-    })
-    vim.lsp.config('GitHub Copilot', {
-      on_attach = nil,
     })
     vim.lsp.config('lua_ls', {
       settings = {

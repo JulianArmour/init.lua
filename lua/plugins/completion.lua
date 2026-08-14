@@ -26,9 +26,6 @@ return {
         { name = 'nvim_lsp' },
       },
     })
-    cmp.setup.filetype({ 'codecompanion' }, {
-      sources = { name = 'codecompanion' }
-    })
   end,
   dependencies = {
     'hrsh7th/cmp-nvim-lsp',
